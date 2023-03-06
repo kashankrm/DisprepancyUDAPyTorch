@@ -1,0 +1,88 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "train unet",
+            "type": "python",
+            "request": "launch",
+            "program": "train_unet.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--exp-name","synlom_v5_train",
+                "--data-dir-image","/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v5/images",
+                "--data-dir-label","/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v5/masks",
+                "--data-list-train","/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v5/train_list.txt",
+                "--data-list-validation","/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v5/val_list.txt",
+                "--num-workers","0",
+                "--num-iterations","5000",
+                "--val-every-it","100",
+                "--gpu-id","0",
+
+            ],
+            "justMyCode": false
+        },
+        {
+            "name": "train unet discrepency",
+            "type": "python",
+            "request": "launch",
+            "program": "train_unet_discrepency.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--exp-name","synlom_v5_train",
+                "--num-workers","0",
+                "--gpu-id", "2",
+                "--batch-size", "12",
+                "--num-iterations", "100000",
+                "--val-every-it", "2000",
+                "--print-train-every-it", "25",
+                "--target-data-dir-image", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images",
+                "--target-data-dir-label", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/masks",
+                "--target-data-list-train", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/train_list.txt",
+                "--target-data-list-validation", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/val_list.txt",
+                "--data-dir-image", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images",
+                "--data-dir-label", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks",
+                "--data-list-train", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt",
+                "--data-list-validation", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/val_list.txt",
+                "--discrepency-level", "1",
+            ]
+
+        },
+        {
+            "name": "train unet adversarial",
+            "type": "python",
+            "request": "launch",
+            "program": "train_unet_adversarial.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--exp-name","synlom_v5_train",
+                "--num-workers","0",
+                "--gpu-id", "3",
+                "--batch-size", "12",
+                "--num-iterations", "100000",
+                "--val-every-it", "50",
+                "--print-train-every-it", "25",
+                "--target-data-dir-image", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images",
+                "--target-data-dir-label", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/masks",
+                "--target-data-list-train", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/train_list.txt",
+                "--target-data-list-validation", "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/val_list.txt",
+                "--data-dir-image", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images",
+                "--data-dir-label", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks",
+                "--data-list-train", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt",
+                "--data-list-validation", "/isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/val_list.txt",
+                "--discrepency-level", "4",
+            ]
+
+        }
+    ]
+}
