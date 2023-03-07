@@ -9,6 +9,7 @@ GPU_ID = 0
 NUM_ITERATIONS = 5000
 VAL_EVERY_IT = 500
 PRINT_TRAIN_EVERY_IT = 100
+SEMI_SUP_DATA_LIST = '/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/15/train_list.txt'
 
 def get_arg_parser():
     parser = argparse.ArgumentParser(description="UNET: Domain Adaptation Model Training")

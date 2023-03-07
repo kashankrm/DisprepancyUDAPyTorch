@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import random
+import os
 import torch
 import copy
 import torch.nn.functional as F
@@ -33,6 +34,8 @@ class Trainer:
         self.phases = {}
         self.train_it = None
         self.output_buffer = {}
+
+        self.model_chkpt = True
 
     def add_dataset(self,name,data):
         self.datasets[name] = {
@@ -177,9 +180,16 @@ class Trainer:
             ret['val_losses'] = val_losses
             ret['val_metrics'] = val_metric_lst
         return ret
-    
+    def save_model(self,iter=None):
+        if self.model_chkpt:
+            log_dir = self.logger.log_dir
+            chkpt_name = f"{iter}_model.pth" if iter else "end_model.pth"
+            torch.save(self.model.state_dict(), os.path.join(log_dir, chkpt_name))
+
     def train(self):
-        return self.model_loop('train',self.iterations,True)
+        ret = self.model_loop('train',self.iterations,True)
+        self.save_model()
+        return ret
     def validate(self):
         if 'val' in self.phases:
             val_dts = [p[0]  for p in self.phases['val']]

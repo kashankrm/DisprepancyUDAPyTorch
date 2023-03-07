@@ -15,7 +15,7 @@ from metrics import (
     iou_metric_bg,
     iou_metric_fg,
     )
-from defaults import get_arg_parser
+from defaults import *
 from utils import get_preprocessing
 
 from torch.utils.tensorboard import SummaryWriter
@@ -62,6 +62,17 @@ def main(args):
             # preprocessing=get_preprocessing(preprocess_input),
             ),
         batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
+    if args.semi_sup_target_list:
+        semi_sup_data_list = args.semi_sup_target_list
+        semi_sup_loader = data.DataLoader(
+            CustomDataset(
+            target_image_path, 
+            semi_sup_data_list, 
+            augment=get_basic_train_augment(),
+            scratch_dir=scratch_dir,
+            # preprocessing=get_preprocessing(preprocess_input),
+            ),
+            batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
 
     logdir = f'log_output/{args.exp_name}'
 
@@ -82,13 +93,13 @@ def main(args):
     trainer.add_criteria("seg_loss",critera)
     trainer.add_criteria("mmd_loss",mmd_loss)
 
-    trainer.assign_disp_criteria_to_dataset('source_train','target_train','mmd_loss',args.discrepency_level,0.01)
+    trainer.assign_disp_criteria_to_dataset('source_train','target_train','mmd_loss',args.discrepency_level,0.005)
     
     trainer.add_metric('fg_iou',iou_metric_fg)
     trainer.add_metric('bg_iou',iou_metric_bg)
     
-    trainer.assign_criteria_to_dataset('train','source_train','seg_loss')
-    #add mmd here
+    trainer.assign_criteria_to_dataset('train','source_train','seg_loss',0.5)
+    
     
     trainer.assign_metric_to_dataset('source_train','fg_iou')
     trainer.assign_metric_to_dataset('source_train','bg_iou')
@@ -102,12 +113,15 @@ def main(args):
     # we want to tell trainer that multi_v5_val should be run at val phase
     trainer.assign_criteria_to_dataset('val','target_val',None)
     trainer.assign_criteria_to_dataset('val','source_val',None)
+    if args.semi_sup_target_list:
+        trainer.add_dataset("semi_sup_dt",semi_sup_loader)
+        trainer.assign_criteria_to_dataset('train','semi_sup_dt','seg_loss')
+        trainer.assign_metric_to_dataset('semi_sup_dt','fg_iou')
+        trainer.assign_metric_to_dataset('semi_sup_dt','bg_iou')
         
     train_dict = trainer.train()
     
-    if not os.path.exists(f"{logdir}/{cur_time}"):
-        os.makedirs(f"{logdir}/{cur_time}")
-    torch.save(model.state_dict(), os.path.join(f"{logdir}/{cur_time}", 'end_model.pth'))
+
     print("")
 
 
@@ -119,6 +133,8 @@ if __name__ == '__main__':
     parser.add_argument("--target-data-dir-label", type=str, required=False,
                         help="Path to the directory containing the target labels.")
     parser.add_argument("--target-data-list-train", type=str,required=True,
+                        help="Path to the file listing the target images for training.")
+    parser.add_argument("--semi-sup-target-list", type=str,default=SEMI_SUP_DATA_LIST,
                         help="Path to the file listing the target images for training.")
     parser.add_argument("--target-data-list-validation", type=str,required=False,
                         help="Path to the file listing the target images for training.")
