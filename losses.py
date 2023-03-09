@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-
+from torch import einsum
+import torch.nn.functional as F
 
 class MMD_loss(nn.Module):
 	def __init__(self, kernel_mul = 2.0, kernel_num = 5):
@@ -50,3 +51,123 @@ class MMD_loss(nn.Module):
 		YX = kernels[batch_size:, :batch_size]
 		loss = torch.mean(XX + YY - XY -YX)
 		return loss
+
+class WDiceLoss(nn.Module):
+    def __init__(self, apply_nonlin=None, smooth=1e-5):
+        """
+        weighted diceloss
+        """
+        super(WDiceLoss, self).__init__()
+
+        self.apply_nonlin = apply_nonlin
+        self.smooth = smooth
+
+    def forward(self, net_output, gt):
+        shp_x = net_output.shape # (batch size,class_num,x,y,z)
+        shp_y = gt.shape # (batch size,1,x,y,z)
+        # one hot code for gt
+        with torch.no_grad():
+            if len(shp_x) != len(shp_y):
+                gt = gt.view((shp_y[0], 1, *shp_y[1:]))
+
+            if all([i == j for i, j in zip(net_output.shape, gt.shape)]):
+                # if this is the case then gt is probably already a one hot encoding
+                y_onehot = gt
+            else:
+                gt = gt.long()
+                y_onehot = torch.zeros(shp_x)
+                if net_output.device.type == "cuda":
+                    y_onehot = y_onehot.cuda(net_output.device.index)
+                y_onehot.scatter_(1, gt, 1)
+
+
+        if self.apply_nonlin is not None:
+            net_output = self.apply_nonlin(net_output)
+        net_output = F.softmax(net_output,dim=1)
+    
+        # copy from https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
+        w: torch.Tensor = (einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10)
+        w = w / einsum("bc->b",w).unsqueeze(1)
+        w = 1 - w
+        intersection: torch.Tensor = w * einsum("bcxy, bcxy->bc", net_output, y_onehot)
+        union: torch.Tensor = w * (einsum("bcxy->bc", net_output) + einsum("bcxy->bc", y_onehot))
+        divided: torch.Tensor =   2 * (einsum("bc->b", intersection) + self.smooth) / (einsum("bc->b", union) + self.smooth)
+        divided = 1 - divided
+        gdc = divided.mean()
+
+        return gdc
+class WJaccardLoss(nn.Module):
+    def __init__(self,apply_nonlin=None):
+        """
+        Weighted Jaccard;
+		modified from above WDiceLoss
+          
+        
+        """
+        super(WJaccardLoss, self).__init__()
+
+        self.apply_nonlin = apply_nonlin
+
+    def forward(self, net_output, gt):
+        shp_x = net_output.shape # (batch size,class_num,x,y,z)
+        shp_y = gt.shape # (batch size,1,x,y,z)
+        # one hot code for gt
+        with torch.no_grad():
+            if len(shp_x) != len(shp_y):
+                gt = gt.view((shp_y[0], 1, *shp_y[1:]))
+
+            if all([i == j for i, j in zip(net_output.shape, gt.shape)]):
+                # if this is the case then gt is probably already a one hot encoding
+                y_onehot = gt
+            else:
+                gt = gt.long()
+                y_onehot = torch.zeros(shp_x)
+                if net_output.device.type == "cuda":
+                    y_onehot = y_onehot.cuda(net_output.device.index)
+                y_onehot.scatter_(1, gt, 1)
+
+        
+        if self.apply_nonlin is not None:
+            net_output = self.apply_nonlin(net_output)
+        net_output = F.softmax(net_output,dim=1)
+    
+        
+        w: torch.Tensor = (einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10) 
+        w = w / einsum("bc->b",w).unsqueeze(1)
+        w = 1 - w
+        intersection: torch.Tensor = w * einsum("bcxy, bcxy->bc", net_output, y_onehot)
+        union: torch.Tensor = w * (einsum("bcxy->bc", net_output) + einsum("bcxy->bc", y_onehot))
+        divided: torch.Tensor =  1 - (einsum("bc->b", intersection)) / (einsum("bc->b", union - intersection))
+        gdc = divided.mean()
+
+        return gdc
+class WBCE(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.bce = nn.BCELoss()
+    def forward(self, net_output, gt):
+        shp_x = net_output.shape # (batch size,class_num,x,y,z)
+        shp_y = gt.shape # (batch size,1,x,y,z)
+        # one hot code for gt
+        with torch.no_grad():
+            if len(shp_x) != len(shp_y):
+                gt = gt.view((shp_y[0], 1, *shp_y[1:]))
+
+            if all([i == j for i, j in zip(net_output.shape, gt.shape)]):
+                # if this is the case then gt is probably already a one hot encoding
+                y_onehot = gt
+            else:
+                gt = gt.long()
+                y_onehot = torch.zeros(shp_x)
+                if net_output.device.type == "cuda":
+                    y_onehot = y_onehot.cuda(net_output.device.index)
+                y_onehot.scatter_(1, gt, 1)
+        net_output = F.softmax(net_output,dim=1)
+        
+        w: torch.Tensor = (einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10) 
+        w = w / einsum("bc->b",w).unsqueeze(1)
+        w = 1 - w
+        w = w.mean(0)
+        loss = F.cross_entropy(net_output,y_onehot,weight=w)
+        
+        return loss

@@ -42,3 +42,16 @@ def get_basic_val_augment():
         A.Resize(288,288)
     ])
     return aug
+def bjoern_augmentation():
+    '''
+    rotation (65°), shift (15%), shear (10%), zoom (20%) as well as vertical and horizontal flip
+    '''
+    aug = A.Compose([
+                                A.augmentations.transforms.ToFloat(always_apply=True),
+                                A.Resize(288,288),
+                                A.augmentations.Rotate(limit=65), 
+                                A.augmentations.geometric.transforms.Affine(mode=cv2.BORDER_REFLECT101,translate_percent=0.15,shear=0.1,scale=0.2),
+                                A.HorizontalFlip(),
+                                A.VerticalFlip()
+    ])
+    return aug
