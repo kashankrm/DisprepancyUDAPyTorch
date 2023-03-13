@@ -5,7 +5,7 @@ import torch, os
 from torch.utils import data
 import segmentation_models_pytorch as smp
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
-from augmentations import get_basic_train_augment,get_basic_val_augment
+from augmentations import get_basic_train_augment,get_basic_val_augment,clahe_augment
 from metrics import (
     dummy_metric,
     metric_wrapper,
@@ -19,11 +19,16 @@ from torch.utils.tensorboard import SummaryWriter
 def main(args):
     scratch_dir = os.environ['TMPDIR'] if 'TMPDIR' in os.environ else None
     preprocess_input = get_preprocessing_fn(args.encoder, pretrained=args.encoder_weights)
+    train_aug = get_basic_train_augment()
+    val_aug = get_basic_val_augment()
+    if args.add_clahe:
+        train_aug = clahe_augment(train_aug)
+        val_aug = clahe_augment(val_aug)
     train_loader = data.DataLoader(
             CustomDataset(
             args.data_dir_image, 
             args.data_list_train, 
-            augment=get_basic_train_augment(),
+            augment=train_aug,
             scratch_dir=scratch_dir,
             # preprocessing=get_preprocessing(preprocess_input),
             ),
@@ -36,7 +41,7 @@ def main(args):
             CustomDataset(
             target_image_path, 
             target_val_list, 
-            augment=get_basic_val_augment(),
+            augment=val_aug,
             scratch_dir=scratch_dir,
             # preprocessing=get_preprocessing(preprocess_input),
             ),

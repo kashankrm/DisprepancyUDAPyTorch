@@ -42,6 +42,8 @@ def get_arg_parser():
                         help=f"perform validation every nth iteration (default: {VAL_EVERY_IT}).")
     parser.add_argument("--print-train-every-it", type=int, default=PRINT_TRAIN_EVERY_IT,
                         help=f"print losses and metric in training every nth iteration (default: {PRINT_TRAIN_EVERY_IT}).")
+    parser.add_argument("--add-clahe",default=False, action='store_true',
+                        help=f"add clahe to every image.")
     
     
     

@@ -61,7 +61,7 @@ class CustomDataset(Dataset):
             segmentation = Image.fromarray(mask)
         if  self.augment:
             
-            augmented = self.augment(image=np.array(img).astype("float32")/255., mask=np.array(segmentation)) # from pixelated image to matrix of number
+            augmented = self.augment(image=np.array(img), mask=np.array(segmentation)) # from pixelated image to matrix of number
             
             img = augmented["image"]
             segmentation = Image.fromarray(augmented["mask"].astype(np.uint8))

@@ -1,5 +1,6 @@
 
 import albumentations as A
+import cv2
 def get_basic_train_augment():
     kwargs = {"brightness_limit": 0.02,
                     "brightness_prob": 0,
@@ -23,6 +24,7 @@ def get_basic_train_augment():
                     "optDist_prob": 0.25,
                 }
     aug = A.Compose([
+                                A.augmentations.transforms.ToFloat(always_apply=True),
                                 A.Resize(288,288),
                                 A.RandomBrightness(limit=kwargs["brightness_limit"], p=kwargs["brightness_prob"]),
                                 A.RandomContrast(limit=kwargs["contrast_limit"], p=kwargs["contrast_prob"]), # randomly changes the contrast to avoid mistakes caused by different contrast from ECM
@@ -39,6 +41,7 @@ def get_basic_train_augment():
     return aug
 def get_basic_val_augment():
     aug = A.Compose([
+        A.augmentations.transforms.ToFloat(always_apply=True),
         A.Resize(288,288)
     ])
     return aug
@@ -55,3 +58,12 @@ def bjoern_augmentation():
                                 A.VerticalFlip()
     ])
     return aug
+
+
+def clahe_augment(aug):
+    ret = A.Compose([
+        A.CLAHE(always_apply=True),
+        aug,
+       
+    ])
+    return ret
