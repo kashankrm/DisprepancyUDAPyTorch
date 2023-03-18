@@ -36,6 +36,7 @@ class Trainer:
         self.output_buffer = {}
 
         self.model_chkpt = True
+        print(f"starting training for {logger.log_dir}")
 
     def add_dataset(self,name,data):
         self.datasets[name] = {
@@ -282,7 +283,7 @@ class DiscrepencyDATrainer(Trainer):
         return losses, metrics
     
     def model_forward(self, x):
-        return self.model.forward_extra(x,out_features=True,out_decoder_output=False)
+        return self.model.forward_extra(x,out_features=True)
 
 class AdversarialDATrainer(DiscrepencyDATrainer):
     def __init__(

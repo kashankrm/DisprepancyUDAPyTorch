@@ -40,9 +40,11 @@ def main(args):
             ),
         batch_size=8, shuffle=True, num_workers=args.num_workers, pin_memory=True)
     if args.data_list_validation:
-        print("Warning: validataion list provided but validation set is hardcoded!")
-    target_image_path = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images"
-    target_val_list = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/5/val_list.txt"
+        target_image_path = args.data_dir_image
+        target_val_list = args.data_list_validation
+    else:
+        target_image_path = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images"
+        target_val_list = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/5/val_list.txt"
     target_val_loader = data.DataLoader(
             CustomDataset(
             target_image_path, 

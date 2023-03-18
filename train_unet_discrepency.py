@@ -7,7 +7,7 @@ from torch.utils import data
 import segmentation_models_pytorch as smp
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
 from augmentations import get_basic_train_augment,get_basic_val_augment
-from models import UnetPlusPlus
+from models import UnetPlusPlus,add_feature_extractor
 from losses import MMD_loss
 from metrics import (
     dummy_metric,
@@ -80,7 +80,9 @@ def main(args):
     tblogger = SummaryWriter(log_dir=f"{logdir}/{cur_time}")
     # logger = CustomLogger(logdir)
     device = torch.device('cpu') if args.cpu else torch.device(f"cuda:{args.gpu_id}")
-    model = UnetPlusPlus(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
+    model_cl = getattr(smp,args.model_arch)
+    model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
+    add_feature_extractor(model)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
     critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,ignore_index=255,smooth=0.5)
     mmd_loss = MMD_loss()

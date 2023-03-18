@@ -2,6 +2,24 @@ from torch import nn
 import segmentation_models_pytorch as smp
 from typing import Optional, List, Union
 
+def add_feature_extractor(model):
+    # adds a forward hook to encoder of the model
+    # so that we can save its output which will 
+    # then be returned in foward_extra function
+     
+    def caching_encoder_hook(self, input,output):
+        self.encoder_cache=output
+        
+    model.encoder.register_forward_hook(caching_encoder_hook)
+    # kinda hacky way to add an extra function to the model
+    def forward_extra(x,out_features=False):
+        ret = (model.forward(x),)
+        features = model.encoder.encoder_cache
+        if out_features:
+            ret = (*ret,features)
+        return ret
+    model.forward_extra = forward_extra
+    return
 class UnetPlusPlus(smp.UnetPlusPlus):
     def __init__(self, 
                  encoder_name: str = "resnet34", 
