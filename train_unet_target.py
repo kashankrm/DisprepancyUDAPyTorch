@@ -14,6 +14,14 @@ from metrics import (
     )
 from defaults import get_arg_parser
 from utils import get_preprocessing
+from losses import WBCE,WDiceLoss,WJaccardLoss
+def bjoern_paper_loss():
+    dice = WDiceLoss()
+    jaccard = WJaccardLoss()
+    wbce = WBCE()
+    def func(input,target):
+        return dice(input,target) + (0.5*jaccard(input,target)+0.5*wbce(input,target))
+    return func
 
 from torch.utils.tensorboard import SummaryWriter
 def main(args):
@@ -58,7 +66,16 @@ def main(args):
     model_cl = getattr(smp,args.model_arch)
     model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
-    critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,ignore_index=255,smooth=0.5)
+    if args.loss_func == 'Dice':
+        critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,smooth=0.5)
+    elif args.loss_func == 'WDice':
+        critera = WDiceLoss()
+    elif args.loss_func == 'WBCE':
+        critera = WBCE()
+    elif args.loss_func == 'WJaccard':
+        critera = WJaccardLoss()
+    elif args.loss_func == 'Bjoern':
+        critera = bjoern_paper_loss()
     trainer = Trainer(model,opt,args.num_iterations,device,tblogger,val_every_it=args.val_every_it)
     trainer.add_dataset("target_train",train_loader)
     
@@ -81,5 +98,6 @@ def main(args):
 
 if __name__ == '__main__':
     arg_parser = get_arg_parser()
+    arg_parser.add_argument("--loss-func",default="Dice", choices=["Dice","WDice","WBCE","WJaccard","Bjoern"])
     args = arg_parser.parse_args()
     main(args)
