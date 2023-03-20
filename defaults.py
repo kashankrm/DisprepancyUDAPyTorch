@@ -44,6 +44,7 @@ def get_arg_parser():
                         help=f"print losses and metric in training every nth iteration (default: {PRINT_TRAIN_EVERY_IT}).")
     parser.add_argument("--add-clahe",default=False, action='store_true',
                         help=f"add clahe to every image.")
+    parser.add_argument("--loss-func",default="Dice", choices=["Dice","WDice","WBCE","WJaccard","Bjoern"])
     parser.add_argument("--model-arch",default="UnetPlusPlus",choices=["UnetPlusPlus","Unet","FPN","DeepLabV3"],
                         help=f"which model architecture to use choices are [UnetPlusPlus:default,Unet,FPN,DeepLabV3]")
     

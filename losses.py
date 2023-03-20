@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch import einsum
 import torch.nn.functional as F
+import segmentation_models_pytorch as smp
 
 class MMD_loss(nn.Module):
 	def __init__(self, kernel_mul = 2.0, kernel_num = 5):
@@ -171,3 +172,24 @@ class WBCE(nn.Module):
         loss = F.cross_entropy(net_output,y_onehot,weight=w)
         
         return loss
+    
+def bjoern_paper_loss():
+    dice = WDiceLoss()
+    jaccard = WJaccardLoss()
+    wbce = WBCE()
+    def func(input,target):
+        return dice(input,target) + (0.5*jaccard(input,target)+0.5*wbce(input,target))
+    return func
+
+def get_loss_func(loss_func):
+    if loss_func == 'Dice':
+        critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,smooth=0.5)
+    elif loss_func == 'WDice':
+        critera = WDiceLoss()
+    elif loss_func == 'WBCE':
+        critera = WBCE()
+    elif loss_func == 'WJaccard':
+        critera = WJaccardLoss()
+    elif loss_func == 'Bjoern':
+        critera = bjoern_paper_loss()
+    return critera

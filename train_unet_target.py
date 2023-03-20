@@ -5,7 +5,7 @@ import torch, os
 from torch.utils import data
 import segmentation_models_pytorch as smp
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
-from augmentations import get_basic_train_augment,get_basic_val_augment,clahe_augment
+from augmentations import get_augmentations,clahe_augment
 from metrics import (
     dummy_metric,
     metric_wrapper,
@@ -14,24 +14,18 @@ from metrics import (
     )
 from defaults import get_arg_parser
 from utils import get_preprocessing
-from losses import WBCE,WDiceLoss,WJaccardLoss
-def bjoern_paper_loss():
-    dice = WDiceLoss()
-    jaccard = WJaccardLoss()
-    wbce = WBCE()
-    def func(input,target):
-        return dice(input,target) + (0.5*jaccard(input,target)+0.5*wbce(input,target))
-    return func
+from losses import get_loss_func
 
 from torch.utils.tensorboard import SummaryWriter
 def main(args):
     scratch_dir = os.environ['TMPDIR'] if 'TMPDIR' in os.environ else None
     preprocess_input = get_preprocessing_fn(args.encoder, pretrained=args.encoder_weights)
-    train_aug = get_basic_train_augment()
-    val_aug = get_basic_val_augment()
-    if args.add_clahe:
-        train_aug = clahe_augment(train_aug)
-        val_aug = clahe_augment(val_aug)
+    train_aug, val_aug = get_augmentations(args.aug_type)
+    # train_aug = get_basic_train_augment()
+    # val_aug = get_basic_val_augment()
+    # if args.add_clahe:
+    #     train_aug = clahe_augment(train_aug)
+    #     val_aug = clahe_augment(val_aug)
     train_loader = data.DataLoader(
             CustomDataset(
             args.data_dir_image, 
@@ -66,16 +60,7 @@ def main(args):
     model_cl = getattr(smp,args.model_arch)
     model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
-    if args.loss_func == 'Dice':
-        critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,smooth=0.5)
-    elif args.loss_func == 'WDice':
-        critera = WDiceLoss()
-    elif args.loss_func == 'WBCE':
-        critera = WBCE()
-    elif args.loss_func == 'WJaccard':
-        critera = WJaccardLoss()
-    elif args.loss_func == 'Bjoern':
-        critera = bjoern_paper_loss()
+    critera = get_loss_func(args.loss_func)
     trainer = Trainer(model,opt,args.num_iterations,device,tblogger,val_every_it=args.val_every_it)
     trainer.add_dataset("target_train",train_loader)
     
@@ -98,6 +83,5 @@ def main(args):
 
 if __name__ == '__main__':
     arg_parser = get_arg_parser()
-    arg_parser.add_argument("--loss-func",default="Dice", choices=["Dice","WDice","WBCE","WJaccard","Bjoern"])
     args = arg_parser.parse_args()
     main(args)

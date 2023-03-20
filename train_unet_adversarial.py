@@ -8,7 +8,7 @@ import segmentation_models_pytorch as smp
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
 from augmentations import get_basic_train_augment,get_basic_val_augment
 from models import FCDiscriminator, UnetPlusPlus, add_feature_extractor
-from losses import MMD_loss
+from losses import MMD_loss, get_loss_func
 from metrics import (
     dummy_metric,
     metric_wrapper,
@@ -99,7 +99,7 @@ def main(args):
     
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
     adv_opt = torch.optim.Adam(adv_model.parameters(), lr=4e-4, betas=(0.9, 0.99))
-    critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,smooth=0.5)
+    critera = get_loss_func(args.loss_func)
     bce_loss = torch.nn.BCEWithLogitsLoss()
     trainer = AdversarialDATrainer(
         model,

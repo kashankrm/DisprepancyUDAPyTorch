@@ -8,7 +8,7 @@ import segmentation_models_pytorch as smp
 from segmentation_models_pytorch.encoders import get_preprocessing_fn
 from augmentations import get_basic_train_augment,get_basic_val_augment
 from models import UnetPlusPlus,add_feature_extractor
-from losses import MMD_loss
+from losses import MMD_loss, get_loss_func
 from metrics import (
     dummy_metric,
     metric_wrapper,
@@ -84,7 +84,7 @@ def main(args):
     model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
     add_feature_extractor(model)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
-    critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,ignore_index=255,smooth=0.5)
+    critera = get_loss_func(args.loss_func)
     mmd_loss = MMD_loss()
     trainer = DiscrepencyDATrainer(model,opt,args.num_iterations,device,tblogger,val_every_it=args.val_every_it,print_train_every_iter=args.print_train_every_it)
     trainer.add_dataset("source_train",train_loader)

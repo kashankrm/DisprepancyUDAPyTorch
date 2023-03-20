@@ -1,4 +1,5 @@
 from datetime import datetime
+from losses import get_loss_func
 from trainer import Trainer
 from datasets import CustomDataset
 import torch, os 
@@ -63,7 +64,7 @@ def main(args):
     model_cl = getattr(smp,args.model_arch)
     model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
-    critera = smp.losses.dice.DiceLoss(mode=smp.losses.MULTICLASS_MODE,ignore_index=255,smooth=0.5)
+    critera = get_loss_func(args.loss_func)
     trainer = Trainer(model,opt,args.num_iterations,device,tblogger,val_every_it=args.val_every_it)
     trainer.add_dataset("source_train",train_loader)
     if args.data_list_validation:
