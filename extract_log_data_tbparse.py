@@ -179,8 +179,6 @@ def get_all_images(ea,log_dir):
             cv2.imwrite(filepath, image)
 
 REPLACE = False
-log_dir = 'log_output/unet_cpv5/02_24_2023_23_53_30'
-log_path = log_dir+'/events.out.tfevents.1677279210.node070.89304.0'
 size_guidance = {'distributions': 1, 'images': 20, 'audio': 0, 'scalars': 0, 'histograms': 0, 'tensors': 0, 'text': 0, 'hparams': 0}
 for log_path in get_all_log_files('log_output'):
     run_extractor_for_log(log_path)
