@@ -84,3 +84,78 @@ class FCDiscriminator(nn.Module):
         x = self.classifier(x)
 
         return x
+def get_encoder_out_shape(args):
+    encoder_name = args.encoder
+    if encoder_name == "densenet201":        
+        return {
+
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":256,
+            "3":512,
+            "4":1792,
+            "5":1920,
+            }
+    elif encoder_name == "densenet161":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":96,
+            "2":384,
+            "3":768,
+            "4":2112,
+            "5":2208,
+            }
+    elif encoder_name == "densenet121":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":256,
+            "3":512,
+            "4":1024,
+            "5":1024,
+            }
+    elif encoder_name == "resnet18":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":64,
+            "3":128,
+            "4":256,
+            "5":512,
+            }
+    elif encoder_name == "resnet18":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":64,
+            "3":128,
+            "4":256,
+            "5":512,
+            }
+    elif encoder_name == "resnet50":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":256,
+            "3":512,
+            "4":1024,
+            "5":2048,
+            }
+    elif encoder_name == "resnet152":
+        return {
+            "output":args.num_classes,
+            "0":3,
+            "1":64,
+            "2":256,
+            "3":512,
+            "4":1024,
+            "5":2048,
+            }
+
+
