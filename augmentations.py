@@ -85,6 +85,14 @@ def get_old_augmentation():
     
     '''
     train_transform = [
+        A.OneOf(
+            [
+                A.CLAHE(p=1),
+                A.RandomBrightness(p=1),
+                A.RandomGamma(p=1),
+            ],
+            p=0.9,
+        ),
         A.augmentations.transforms.ToFloat(always_apply=True),
         A.Resize(288,288),
 
@@ -98,15 +106,6 @@ def get_old_augmentation():
 
         A.IAAAdditiveGaussianNoise(p=0.2),
         A.IAAPerspective(p=0.5),
-
-        A.OneOf(
-            [
-                A.CLAHE(p=1),
-                A.RandomBrightness(p=1),
-                A.RandomGamma(p=1),
-            ],
-            p=0.9,
-        ),
 
         A.OneOf(
             [
