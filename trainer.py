@@ -6,6 +6,7 @@ import os
 import torch
 import copy
 import torch.nn.functional as F
+import optuna
 from utils import combine_val_ret
 from torch.utils.tensorboard import SummaryWriter
 
@@ -18,7 +19,8 @@ class Trainer:
                 logger:SummaryWriter,
                 val_img_save=True,
                 val_every_it:int=-1,
-                print_train_every_iter = 1
+                print_train_every_iter = 1,
+                trial = None,
                 ) -> None:
         self.model = model.to(device)
         self.logger = logger
@@ -34,6 +36,7 @@ class Trainer:
         self.phases = {}
         self.train_it = None
         self.output_buffer = {}
+        self.trial = trial
 
         self.model_chkpt = True
         print(f"starting training for {logger.log_dir}")
@@ -169,6 +172,12 @@ class Trainer:
                         self.logger.add_scalar(f"val_loss_{k}",v,global_step=i)
                     for k,v in val_metric.items():
                         self.logger.add_scalar(f"val_metric_{k}",v,global_step=i)
+                    if self.trial:
+                        tmiou_val = val_metric['fg_iou'] + val_metric['bg_iou']
+                        tmiou_val /=2
+                        self.trial.report(tmiou_val, i)
+                        if self.trial.should_prune():
+                            raise optuna.TrialPruned()
                     
         # kinda hacky way to check what training iteration it is
         self.train_it = None
@@ -210,7 +219,8 @@ class DiscrepencyDATrainer(Trainer):
                 logger: SummaryWriter, 
                 val_img_save=True, 
                 val_every_it: int = -1,
-                print_train_every_iter = 1
+                print_train_every_iter = 1,
+                trial = None,
                 ) -> None:
         super().__init__(
                         model, 
@@ -220,7 +230,8 @@ class DiscrepencyDATrainer(Trainer):
                         logger, 
                         val_img_save, 
                         val_every_it,
-                        print_train_every_iter)
+                        print_train_every_iter,
+                        trial=trial)
         self.disp_criteria_pairs = []
 
     # def add_criteria(self, name:str, criteria):
@@ -295,7 +306,8 @@ class AdversarialDATrainer(DiscrepencyDATrainer):
             logger: SummaryWriter, 
             val_img_save=True, 
             val_every_it: int = -1, 
-            print_train_every_iter=1
+            print_train_every_iter=1,
+            trial = None,
             
             ) -> None:
         super().__init__(
@@ -306,7 +318,8 @@ class AdversarialDATrainer(DiscrepencyDATrainer):
                 logger, 
                 val_img_save, 
                 val_every_it, 
-                print_train_every_iter
+                print_train_every_iter,
+                trial=trial
                 )
         self.adv_model = {}
         self.adv_opt = {}
