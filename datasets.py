@@ -42,6 +42,8 @@ class CustomDataset(Dataset):
         self.files = []
 
         for name in self.img_ids:
+            if name == "":
+                continue
             img_file = osp.join(self.dataset_path_images, name)
             label_file = osp.join(self.dataset_path_labels, name )
             self.files.append({
