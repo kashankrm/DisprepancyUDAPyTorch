@@ -59,6 +59,9 @@ def main(args):
     device = torch.device('cpu') if args.cpu else torch.device(f"cuda:{args.gpu_id}")
     model_cl = getattr(smp,args.model_arch)
     model = model_cl(args.encoder,encoder_weights=args.encoder_weights,classes=args.num_classes)
+    if args.load_snapshot_path:
+        st_dict = torch.load(args.load_snapshot_path)
+        model.load_state_dict(st_dict)
     opt = torch.optim.Adam(model.parameters(),lr=0.0006)
     critera = get_loss_func(args.loss_func)
     trainer = Trainer(model,opt,args.num_iterations,device,tblogger,val_every_it=args.val_every_it)

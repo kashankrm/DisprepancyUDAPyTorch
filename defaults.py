@@ -49,6 +49,8 @@ def get_arg_parser():
                         help=f"which model architecture to use choices are [UnetPlusPlus:default,Unet,FPN,DeepLabV3]")
     parser.add_argument("--aug-type",default="adaptsegnet",choices=["adaptsegnet","old_repo","clahe+adaptsegnet","clahe+old_repo"],
                         help=f"which data augmentation set to use choices are [adaptsegnet:default,old_repo,clahe+adaptsegnet,clahe+old_repo]")
+    parser.add_argument("--load-snapshot-path",default=None,
+                        help=f"path for the model to load before training")
     
     
     
