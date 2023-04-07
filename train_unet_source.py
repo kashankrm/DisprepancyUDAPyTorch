@@ -13,7 +13,7 @@ from metrics import (
     iou_metric_bg,
     iou_metric_fg,
     )
-from defaults import get_arg_parser
+from defaults import *
 from utils import get_preprocessing
 
 from torch.utils.tensorboard import SummaryWriter
@@ -40,12 +40,12 @@ def main(args):
                 # preprocessing=get_preprocessing(preprocess_input),
                 ),
             batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
-    if args.data_list_validation:
-        target_image_path = args.data_dir_image
-        target_val_list = args.data_list_validation
+    if args.target_data_list_validation:
+        target_image_path = args.target_data_dir_image
+        target_val_list = args.target_data_list_validation
     else:
-        target_image_path = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images"
-        target_val_list = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/5/val_list.txt"
+        target_image_path = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images"
+        target_val_list = "/isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/val_list.txt"
     target_val_loader = data.DataLoader(
             CustomDataset(
             target_image_path, 
@@ -93,5 +93,12 @@ def main(args):
 
 if __name__ == '__main__':
     arg_parser = get_arg_parser()
+    arg_parser.add_argument("--target-data-dir-image", type=str, required=True,
+                        help="Path to the directory containing the target images.")
+    arg_parser.add_argument("--target-data-dir-label", type=str, required=False,
+                        help="Path to the directory containing the target labels.")
+    arg_parser.add_argument("--target-data-list-validation", type=str,required=False,
+                        help="Path to the file listing the target images for training.")
+    
     args = arg_parser.parse_args()
     main(args)

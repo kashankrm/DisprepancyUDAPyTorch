@@ -38,14 +38,14 @@ def recent_job(model_name):
     all_versions = os.listdir(os.path.join(log_out,model_name))
     all_versions = [av for av in all_versions if os.path.isdir(os.path.join(log_out,model_name,av))]
     all_versions_dt = [(i,datetime.strptime(av,datetime_format)) for i,av in enumerate(all_versions)]
-    all_versions_dt = sorted(all_versions_dt,key=lambda x:x[1])
+    all_versions_dt = list(reversed(sorted(all_versions_dt,key=lambda x:x[1])))
     chosen_av = all_versions_dt[RECENT_IND] if len(all_versions)>=(RECENT_IND+1) else all_versions_dt[-1]
     recent_job_path = all_versions[chosen_av[0]]
     return os.path.join(log_out,model_name,recent_job_path)
 log_out = 'log_output'
 copy_out = 'csv_output'
 REPLACE_FILE =True
-RECENT_IND = 1
+RECENT_IND = 0
 model_names = os.listdir(log_out)
 datetime_format = "%m_%d_%Y_%H_%M_%S"
 

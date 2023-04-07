@@ -39,6 +39,7 @@ class Trainer:
         self.trial = trial
 
         self.model_chkpt = True
+        self.best_tmiou_val = None
         print(f"starting training for {logger.log_dir}")
 
     def add_dataset(self,name,data):
@@ -172,12 +173,17 @@ class Trainer:
                         self.logger.add_scalar(f"val_loss_{k}",v,global_step=i)
                     for k,v in val_metric.items():
                         self.logger.add_scalar(f"val_metric_{k}",v,global_step=i)
+                    tmiou_val = val_metric['target_val__fg_iou'] + val_metric['target_val__bg_iou']
+                    tmiou_val /=2
+                        
                     if self.trial:
-                        tmiou_val = val_metric['fg_iou'] + val_metric['bg_iou']
-                        tmiou_val /=2
                         self.trial.report(tmiou_val, i)
                         if self.trial.should_prune():
                             raise optuna.TrialPruned()
+                    if self.model_chkpt:
+                        if self.best_tmiou_val is None or self.best_tmiou_val<tmiou_val:
+                            self.best_tmiou_val = tmiou_val
+                            self.save_model(i,name=f"{tmiou_val:0.4}".replace('.','_'))    
                     
         # kinda hacky way to check what training iteration it is
         self.train_it = None
@@ -190,10 +196,10 @@ class Trainer:
             ret['val_losses'] = val_losses
             ret['val_metrics'] = val_metric_lst
         return ret
-    def save_model(self,iter=None):
+    def save_model(self,iter=None,name=""):
         if self.model_chkpt:
             log_dir = self.logger.log_dir
-            chkpt_name = f"{iter}_model.pth" if iter else "end_model.pth"
+            chkpt_name = f"{iter}_{name+'_'}model.pth" if iter else "end_model.pth"
             torch.save(self.model.state_dict(), os.path.join(log_dir, chkpt_name))
 
     def train(self):

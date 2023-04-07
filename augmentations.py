@@ -1,6 +1,43 @@
 
 import albumentations as A
+import albumentations.augmentations.functional as F
 import cv2
+
+class ConvertToRGB(A.augmentations.transforms.ImageOnlyTransform):
+    """Rescale the image in a sample to a given size.
+
+    Args:
+        output_size (tuple or int): Desired output size. If tuple, output is
+            matched to output_size. If int, smaller of image edges is matched
+            to output_size keeping aspect ratio the same.
+    """
+
+
+
+    """Convert the input grayscale image to RGB.
+    Args:
+        p (float): probability of applying the transform. Default: 1.
+    Targets:
+        image
+    Image types:
+        uint8, float32
+    """
+
+    def __init__(self, always_apply=True, p=1.0):
+        super(ConvertToRGB, self).__init__(always_apply=always_apply, p=p)
+
+    def apply(self, img, **params):
+        if F.is_rgb_image(img):
+            
+            return img
+        if not F.is_grayscale_image(img):
+            raise TypeError("ToRGB transformation expects 2-dim images or 3-dim with the last dimension equal to 1.")
+
+        return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+
+    def get_transform_init_args_names(self):
+        return ()
+
 def get_basic_train_augment():
     kwargs = {"brightness_limit": 0.02,
                     "brightness_prob": 0,
@@ -25,6 +62,8 @@ def get_basic_train_augment():
                 }
     aug = A.Compose([
                                 A.augmentations.transforms.ToFloat(always_apply=True),
+                                A.augmentations.transforms.ToGray(always_apply=True),
+                                ConvertToRGB(always_apply=True),
                                 A.Resize(288,288),
                                 A.RandomBrightness(limit=kwargs["brightness_limit"], p=kwargs["brightness_prob"]),
                                 A.RandomContrast(limit=kwargs["contrast_limit"], p=kwargs["contrast_prob"]), # randomly changes the contrast to avoid mistakes caused by different contrast from ECM
@@ -41,6 +80,8 @@ def get_basic_train_augment():
     return aug
 def get_basic_val_augment():
     aug = A.Compose([
+        A.augmentations.transforms.ToGray(always_apply=True),
+        ConvertToRGB(always_apply=True),
         A.augmentations.transforms.ToFloat(always_apply=True),
         A.Resize(288,288)
     ])
@@ -51,6 +92,8 @@ def bjoern_augmentation():
     '''
     aug = A.Compose([
                                 A.augmentations.transforms.ToFloat(always_apply=True),
+                                A.augmentations.transforms.ToGray(always_apply=True),
+                                ConvertToRGB(always_apply=True),
                                 A.Resize(288,288),
                                 A.augmentations.Rotate(limit=65), 
                                 A.augmentations.geometric.transforms.Affine(mode=cv2.BORDER_REFLECT101,translate_percent=0.15,shear=0.1,scale=0.2),
