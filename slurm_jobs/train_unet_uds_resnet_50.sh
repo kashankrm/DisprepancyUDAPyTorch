@@ -51,9 +51,10 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_uds_resnet50 \
+python ${jobFile}.py --exp-name unet_vanilla_uds_resnet50 \
 --gpu-id 0 \
 --encoder resnet50 \
+--model-arch Unet \
 --batch-size 12 \
 --num-iterations 100000 \
 --val-every-it 200 \

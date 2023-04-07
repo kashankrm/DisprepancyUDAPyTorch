@@ -51,11 +51,13 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_cpv3 \
+python ${jobFile}.py --exp-name unet_cpv3_densenet201 \
 --gpu-id 0 \
 --batch-size 12 \
+--encoder densenet201 \
+--model-arch Unet \
 --num-iterations 100000 \
---val-every-it 200 \
+--val-every-it 500 \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images \
 --data-dir-label /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks \
 --data-list-train /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt \

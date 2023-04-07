@@ -162,3 +162,4 @@ cython_debug/
 csv_output/
 log_output/
 slurm_jobs/slurm_logs/
+log_archive/

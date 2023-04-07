@@ -51,9 +51,10 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_uds \
+python ${jobFile}.py --exp-name unet_vanilla_uds \
 --gpu-id 0 \
 --batch-size 12 \
+--model-arch Unet \
 --num-iterations 100000 \
 --val-every-it 200 \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images \

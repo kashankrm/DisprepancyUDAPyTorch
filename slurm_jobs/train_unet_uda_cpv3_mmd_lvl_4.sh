@@ -5,7 +5,7 @@
 ##SBATCH --nodes=1
 ### Number of tasks per node. This has to be the same a given in the Abaqus command after -cpus.
 ### A large number of cores will consume a lot of tokens. # We need to check how the number of cores needs to be specified. What the limitations are on the gpu
-#SBATCH --ntasks-per-node=8
+#SBATCH --ntasks-per-node=4
 ### Duration, in this case not necessary
 ###SBATCH --time=d-hh:mm:ss
 ### The queue (partition) should be abaqus --> changed it to gpu for our purpose
@@ -51,16 +51,21 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_uda_cpv3_mmd_lvl_4 \
+python ${jobFile}.py --exp-name unet_uda_cpv3_mmd_lvl_4_ssl_15_noleak \
 --gpu-id 0 \
 --batch-size 12 \
+--num-workers 4 \
 --num-iterations 100000 \
 --val-every-it 2000 \
+--loss-func Dice \
+--model-arch Unet \
+--encoder densenet201 \
 --print-train-every-it 25 \
---target-data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images \
---target-data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/masks \
---target-data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/train_list.txt \
---target-data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/val_list.txt \
+--target-data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
+--target-data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
+--target-data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/train_list.txt \
+--semi-sup-target-list /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/15/train_list.txt \
+--target-data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/val_list.txt \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images \
 --data-dir-label /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks \
 --data-list-train /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt \

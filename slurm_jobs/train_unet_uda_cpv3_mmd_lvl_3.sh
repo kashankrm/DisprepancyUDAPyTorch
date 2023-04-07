@@ -11,7 +11,7 @@
 ### The queue (partition) should be abaqus --> changed it to gpu for our purpose
 ### #SBATCH --partition=abafast
 ### #SBATCH --partition=short
-#SBATCH --partition=4gpu
+#SBATCH --partition=gpu
 
 ### Get mail when certain events occur (BEGIN, END, ALL)
 #SBATCH --mail-type END
@@ -51,16 +51,21 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_uda_cpv3_mmd_lvl_3 \
+python ${jobFile}.py --exp-name unet_uda_cpv3_mmd_lvl_3_ssl_15_noleak \
 --gpu-id 0 \
 --batch-size 12 \
 --num-iterations 100000 \
 --val-every-it 2000 \
+--num-workers 8 \
+--loss-func Dice \
+--model-arch Unet \
+--encoder densenet201 \
 --print-train-every-it 25 \
---target-data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/images \
---target-data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/masks \
---target-data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/train_list.txt \
---target-data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_dataset_noset/perc_val_const/85/val_list.txt \
+--target-data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
+--target-data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
+--target-data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/train_list.txt \
+--semi-sup-target-list /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/15/train_list.txt \
+--target-data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/val_list.txt \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images \
 --data-dir-label /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks \
 --data-list-train /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt \

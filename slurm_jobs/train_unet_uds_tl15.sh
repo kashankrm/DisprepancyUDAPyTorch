@@ -11,7 +11,7 @@
 ### The queue (partition) should be abaqus --> changed it to gpu for our purpose
 ### #SBATCH --partition=abafast
 ### #SBATCH --partition=short
-#SBATCH --partition=gpu
+#SBATCH --partition=4gpu
 
 ### Get mail when certain events occur (BEGIN, END, ALL)
 #SBATCH --mail-type END
@@ -22,7 +22,7 @@
 
 # specify filename of python training script
 cd ..
-jobFile=train_unet_discrepency
+jobFile=train_unet_target
 JOBNAME=DL_${jobFile}_${SLURM_JOBID}
 
 
@@ -51,26 +51,19 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_uda_cpv3_mmd_lvl_1_ssl_15_noleak \
---gpu-id 0 \
---batch-size 12 \
---num-workers 8 \
---num-iterations 100000 \
---val-every-it 2000 \
+python ${jobFile}.py --exp-name unet_transfer_learning_15pt \
+--gpu-id 1 \
 --loss-func Dice \
+--batch-size 12 \
 --model-arch Unet \
 --encoder densenet201 \
---print-train-every-it 25 \
---target-data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
---target-data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
---target-data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/train_list.txt \
---semi-sup-target-list /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/15/train_list.txt \
---target-data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/85/val_list.txt \
---data-dir-image /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/images \
---data-dir-label /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/masks \
---data-list-train /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/train_list.txt \
---data-list-validation /isi/w/lb27/data/PAG_segmentation/raw/semantic_segmentation/SynLOM_multi_cut_paste_v3/val_list.txt \
---discrepency-level 1 \
+--num-iterations 100000 \
+--val-every-it 500 \
+--load-snapshot-path /isi/w/lb27/repos/UDA_training/log_output/unet_cpv3_densenet201/04_05_2023_17_48_52/89999_0_9422_model.pth \
+--data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
+--data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
+--data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/15/train_list.txt \
+--data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/15/val_list.txt \
 
 sleep 5
 ### This loop is required for the function above to work. As long as the lockfile exists this script will trap the TERM signal sent by the queueing-system.
