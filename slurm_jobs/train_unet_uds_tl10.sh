@@ -51,8 +51,8 @@ export WKHTMLTOPDF_PATH=/isi/w/lb27/softwares/wkhtmltopdf/usr/local/bin/wkhtmlto
 ## activate the requried conda environment and run the python script
 conda activate detectron
 #python ${jobFile}.py --exp-name test_S_to_T3_K0_After_Aurele
-python ${jobFile}.py --exp-name unet_transfer_learning_30pt \
---gpu-id 1 \
+python ${jobFile}.py --exp-name unet_transfer_learning_10pt \
+--gpu-id 0 \
 --loss-func Dice \
 --batch-size 12 \
 --model-arch Unet \
@@ -62,8 +62,8 @@ python ${jobFile}.py --exp-name unet_transfer_learning_30pt \
 --load-snapshot-path /isi/w/lb27/repos/UDA_training/log_output/unet_cpv3_densenet201/04_05_2023_17_48_52/89999_0_9422_model.pth \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
 --data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
---data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/30/train_list.txt \
---data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/30/val_list.txt \
+--data-list-train /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/10/train_list.txt \
+--data-list-validation /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/perc_val/10/val_list.txt \
 
 sleep 5
 ### This loop is required for the function above to work. As long as the lockfile exists this script will trap the TERM signal sent by the queueing-system.

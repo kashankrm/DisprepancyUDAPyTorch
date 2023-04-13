@@ -163,3 +163,4 @@ csv_output/
 log_output/
 slurm_jobs/slurm_logs/
 log_archive/
+*.zip

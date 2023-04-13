@@ -57,8 +57,8 @@ python ${jobFile}.py --exp-name unet_transfer_learning_5pt \
 --batch-size 12 \
 --model-arch Unet \
 --encoder densenet201 \
---num-iterations 100000 \
---val-every-it 500 \
+--num-iterations 25000 \
+--val-every-it 10 \
 --load-snapshot-path /isi/w/lb27/repos/UDA_training/log_output/unet_cpv3_densenet201/04_05_2023_17_48_52/89999_0_9422_model.pth \
 --data-dir-image /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/images \
 --data-dir-label /isi/w/lb27/data/PAG_segmentation/processed/semantic_segmentation/real_data/nital_pag_no_overlap_comb/masks \
